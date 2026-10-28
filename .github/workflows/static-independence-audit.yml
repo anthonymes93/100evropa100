@@ -1,0 +1,111 @@
+name: Static independence certification audit
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/static-independence-audit.yml
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install browser test tools
+        run: |
+          python -m pip install playwright
+          python -m playwright install --with-deps chromium
+      - name: Audit local resources and deployed website
+        env:
+          SITE_URL: https://100evropa100.vercel.app/
+        run: |
+          python - <<'PY'
+          import os,re,json,pathlib,urllib.parse,collections
+          from html.parser import HTMLParser
+          from playwright.sync_api import sync_playwright
+          root=pathlib.Path.cwd()
+          issues=[]
+          warnings=[]
+          counters=collections.Counter()
+          originals=['evropaflooring.com','www.evropaflooring.com']
+          files={p.relative_to(root).as_posix() for p in root.rglob('*') if p.is_file() and '.git' not in p.parts}
+          pages=['index.html','services/index.html','projects/index.html','contact-us/index.html']
+          for p in files:
+              if p.endswith('.html') and p.startswith('projects/index'): pages.append(p)
+          pages=sorted(set(pages))
+          class Parser(HTMLParser):
+              def __init__(self):super().__init__();self.refs=[]
+              def handle_starttag(self,tag,attrs):
+                  d=dict(attrs)
+                  for k in ('href','src','poster','data-src','data-lazy-src','srcset'):
+                      if d.get(k):
+                          for u in (d[k].split(',') if k=='srcset' else [d[k]]):
+                              self.refs.append((k,u.strip().split(' ')[0]))
+          def local_check(source,url,kind):
+              if not url or url.startswith(('#','data:','javascript:','mailto:','tel:','blob:')):return
+              parsed=urllib.parse.urlsplit(url)
+              if parsed.netloc:
+                  if any(parsed.netloc.lower().endswith(d) for d in originals):issues.append(['ORIGINAL_DOMAIN',source,url])
+                  else:warnings.append(['EXTERNAL_REFERENCE',source,url])
+                  return
+              if parsed.scheme:return
+              path=urllib.parse.unquote(parsed.path)
+              if not path:return
+              target=path.lstrip('/') if path.startswith('/') else str(pathlib.PurePosixPath(source).parent/path)
+              components=[]
+              for part in target.split('/'):
+                  if part=='..':
+                      if components:components.pop()
+                  elif part not in ('','.'):components.append(part)
+              target='/'.join(components)
+              if target not in files and (target+'/index.html') not in files:issues.append(['MISSING_LOCAL_RESOURCE',source,url])
+              counters[kind]+=1
+          for p in sorted(files):
+              if p.endswith('.css'):
+                  s=(root/p).read_text(errors='replace')
+                  for u in re.findall(r'url\(\s*["\']?([^)"\']+)',s,re.I):local_check(p,u,'css_urls')
+              if p in pages:
+                  s=(root/p).read_text(errors='replace')
+                  parser=Parser();parser.feed(s)
+                  for k,u in parser.refs:local_check(p,u,'html_refs')
+          for p in pages:
+              s=(root/p).read_text(errors='replace')
+              if 'evropaflooring.com' in s:issues.append(['ORIGINAL_DOMAIN_IN_PAGE',p,''])
+          print('LOCAL files',len(files),'pages',len(pages),'reference_checks',dict(counters))
+          print('LOCAL issues',json.dumps(issues[:100],indent=2))
+          print('LOCAL external reference samples',json.dumps(warnings[:60],indent=2))
+          browser_issues=[]
+          with sync_playwright() as pw:
+              browser=pw.chromium.launch(headless=True)
+              context=browser.new_context(viewport={'width':1440,'height':900},service_workers='block')
+              page=context.new_page()
+              seen=[]
+              page.on('request',lambda req:seen.append(req.url))
+              page.on('pageerror',lambda err:browser_issues.append(['JS_ERROR',str(err)]))
+              site=os.environ['SITE_URL'].rstrip('/')
+              for route in ('/','/services/','/projects/','/contact-us/'):
+                  try:
+                      response=page.goto(site+route,wait_until='networkidle',timeout=45000)
+                      page.wait_for_timeout(1800)
+                      print('BROWSER',route,'HTTP',response.status if response else None,'title',page.title(),'images',page.locator('img').count())
+                      if not response or response.status>=400:browser_issues.append(['BAD_PAGE_STATUS',route,str(response.status if response else None)])
+                      broken=page.evaluate('''() => [...document.images].filter(i=>i.complete&&i.naturalWidth===0).map(i=>i.src).slice(0,30)''')
+                      for image in broken:browser_issues.append(['BROKEN_IMAGE',route,image])
+                      if route=='/projects/':
+                          btn=page.get_by_role('button',name='Next →')
+                          if btn.count():
+                              btn.first.click();page.wait_for_timeout(750)
+                              print('GALLERY page advance:',page.locator('.evg-pages').inner_text())
+                          else:browser_issues.append(['GALLERY_NEXT_NOT_FOUND',route,''])
+                  except Exception as e:browser_issues.append(['BROWSER_FAILURE',route,str(e)[:250]])
+              for u in set(seen):
+                  host=urllib.parse.urlsplit(u).netloc.lower()
+                  if any(host==d or host.endswith('.'+d) for d in originals):browser_issues.append(['ORIGINAL_DOMAIN_REQUEST','',u])
+              print('BROWSER request count',len(seen))
+              print('BROWSER external hosts',sorted({urllib.parse.urlsplit(u).netloc for u in seen if urllib.parse.urlsplit(u).netloc not in ('100evropa100.vercel.app',)}))
+              browser.close()
+          print('BROWSER issues',json.dumps(browser_issues[:100],indent=2))
+          print('RESULT', 'FAIL' if issues or browser_issues else 'PASS')
+          if issues or browser_issues:raise SystemExit(1)
+          PY
