@@ -47,11 +47,17 @@ jobs:
                   content = z.read(original)
                   (target/name).write_bytes(content)
                   print(name, len(content), hashlib.sha256(content).hexdigest())
+              for relative in ['lib/dialog/dialog.min.js', 'lib/share-link/share-link.min.js', 'lib/swiper/v8/swiper.min.js']:
+                  content = z.read('elementor/assets/' + relative)
+                  destination = pathlib.Path('wp-content/plugins/elementor/assets') / relative
+                  destination.parent.mkdir(parents=True, exist_ok=True)
+                  destination.write_bytes(content)
+                  print(relative, len(content), hashlib.sha256(content).hexdigest())
           PY
       - name: Commit restored JS bundles
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add wp-content/plugins/elementor/assets/js/*.bundle.min.js
-          git diff --cached --quiet || (git commit -m "Restore 13 official Elementor 3.21.8 JS bundles" && git push)
+          git add wp-content/plugins/elementor/assets/js/*.bundle.min.js wp-content/plugins/elementor/assets/lib/dialog/dialog.min.js wp-content/plugins/elementor/assets/lib/share-link/share-link.min.js wp-content/plugins/elementor/assets/lib/swiper/v8/swiper.min.js
+          git diff --cached --quiet || (git commit -m "Restore official Elementor 3.21.8 dynamic JS and libraries" && git push)
