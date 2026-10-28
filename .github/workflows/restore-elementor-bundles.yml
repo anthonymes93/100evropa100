@@ -1,0 +1,57 @@
+name: Restore verified Elementor frontend bundles
+on:
+  push:
+    paths:
+      - .github/workflows/restore-elementor-bundles.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Download and verify official Elementor release, install missing bundles
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import urllib.request, hashlib, io, zipfile, pathlib
+          url = 'https://downloads.wordpress.org/plugin/elementor.3.21.8.zip'
+          expected_zip_sha256 = 'fd38f012f5ee96da4adcfc97b4db1f1cfd42f332e4045765241265ed7bf3228d'
+          data = urllib.request.urlopen(url, timeout=90).read()
+          digest = hashlib.sha256(data).hexdigest()
+          print('Downloaded ZIP SHA256:', digest)
+          if digest != expected_zip_sha256:
+              raise SystemExit('Archive differs from user-verified ZIP; refusing to install.')
+          names = [
+              'lightbox.94b920846d1e37cafb78.bundle.min.js',
+              'text-path.2bc8a9cd0e50cf1a5a9c.bundle.min.js',
+              'accordion.8799675460c73eb48972.bundle.min.js',
+              'alert.cbc2a0fee74ee3ed0419.bundle.min.js',
+              'counter.02cef29c589e742d4c8c.bundle.min.js',
+              'progress.ca55d33bb06cee4e6f02.bundle.min.js',
+              'tabs.c2af5be7f9cb3cdcf3d5.bundle.min.js',
+              'toggle.31881477c45ff5cf9d4d.bundle.min.js',
+              'video.d11c91c1b2b642a34601.bundle.min.js',
+              'image-carousel.4455c6362492d9067512.bundle.min.js',
+              'text-editor.2c35aafbe5bf0e127950.bundle.min.js',
+              'wp-audio.75f0ced143febb8cd31a.bundle.min.js',
+              'container.c65a2a923085e1120e75.bundle.min.js',
+          ]
+          target = pathlib.Path('wp-content/plugins/elementor/assets/js')
+          with zipfile.ZipFile(io.BytesIO(data)) as z:
+              for name in names:
+                  original = 'elementor/assets/js/' + name
+                  content = z.read(original)
+                  (target/name).write_bytes(content)
+                  print(name, len(content), hashlib.sha256(content).hexdigest())
+          PY
+      - name: Commit restored JS bundles
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add wp-content/plugins/elementor/assets/js/*.bundle.min.js
+          git diff --cached --quiet || (git commit -m "Restore 13 official Elementor 3.21.8 JS bundles" && git push)
