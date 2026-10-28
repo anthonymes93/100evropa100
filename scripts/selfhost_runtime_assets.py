@@ -22,10 +22,10 @@ sha_records = []
 for path in PAGES:
     content = (ROOT/path).read_text(encoding='utf-8')
     prefix = '' if path=='index.html' else '../'
-    pattern = r'<link\\b(?=[^>]*href=[\\x22\\x27]https://fonts\\.googleapis\\.com/css[^\\x22\\x27]*[\\x22\\x27])[^>]*>'
+    pattern = r'<link\b(?=[^>]*href=[\x22\x27]https://fonts\.googleapis\.com/css[^\x22\x27]*[\x22\x27])[^>]*>'
     def replace_link(match):
         tag=match.group(0)
-        url=html.unescape(re.search(r'href=[\\x22\\x27]([^\\x22\\x27]+)',tag).group(1))
+        url=html.unescape(re.search(r'href=[\x22\x27]([^\x22\x27]+)',tag).group(1))
         if url not in downloaded:
             stylesheet=get(url).decode('utf-8')
             def replace_font(m):
@@ -41,16 +41,16 @@ for path in PAGES:
                     downloaded[remote]=(destination,data)
                     sha_records.append({'source':remote,'file':destination,'sha256':digest})
                 return 'url(./'+downloaded[remote][0].split('assets/',1)[1]+')'
-            stylesheet=re.sub(r'url\\(\\s*[\\x22\\x27]?(https://fonts\\.gstatic\\.com/[^)\\x22\\x27]+)[\\x22\\x27]?\\s*\\)',replace_font,stylesheet)
+            stylesheet=re.sub(r'url\(\s*[\x22\x27]?(https://fonts\.gstatic\.com/[^)\x22\x27]+)[\x22\x27]?\s*\)',replace_font,stylesheet)
             digest=hashlib.sha256(url.encode()).hexdigest()
             destination=f'assets/fonts/google-{digest[:20]}.css'
             downloaded[url]=(destination,stylesheet.encode('utf-8'))
         destination=downloaded[url][0]
-        return re.sub(r'href=[\\x22\\x27][^\\x22\\x27]+[\\x22\\x27]','href="'+prefix+destination+'"',tag)
+        return re.sub(r'href=[\x22\x27][^\x22\x27]+[\x22\x27]','href="'+prefix+destination+'"',tag)
     content=re.sub(pattern,replace_link,content,flags=re.I)
-    content=re.sub(r'<link\\b(?=[^>]*href=[\\x22\\x27](?:https?:)?//fonts\\.(?:googleapis|gstatic)\\.com/)[^>]*>\\s*','',content,flags=re.I)
+    content=re.sub(r'<link\b(?=[^>]*href=[\x22\x27](?:https?:)?//fonts\.(?:googleapis|gstatic)\.com/)[^>]*>\s*','',content,flags=re.I)
     if path=='contact-us/index.html':
-        iframe=re.search(r'<iframe\\b[^>]*src=[\\x22\\x27]https://maps\\.google\\.com/[^>]*>\\s*</iframe>',content,flags=re.I|re.S)
+        iframe=re.search(r'<iframe\b[^>]*src=[\x22\x27]https://maps\.google\.com/[^>]*>\s*</iframe>',content,flags=re.I|re.S)
         if not iframe:raise RuntimeError('Expected contact map iframe not found')
         content=content[:iframe.start()]+'''<div class="ev-local-map" role="group" aria-label="Hamilton Ontario location">
           <div class="ev-local-map-title">Serving Hamilton, Ontario</div>
