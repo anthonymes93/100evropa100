@@ -19,3 +19,13 @@
 .ev-testimonials-controls button:focus-visible{outline:2px solid #222;outline-offset:3px}
 @media(max-width:1023px){.ev-testimonials-card{flex-basis:calc((100% - 20px)/2)}}
 @media(max-width:767px){.ev-testimonials-card{flex-basis:100%;padding:24px 20px}}
+
+/* Hero repair: keep slideshow above the section's opaque background, under overlay and text. */
+.elementor-308 .elementor-element.elementor-element-3b36084a{position:relative!important;isolation:isolate;overflow:hidden;background-image:none!important}
+.elementor-308 .elementor-element.elementor-element-3b36084a>.elementor-background-slideshow{display:none!important}
+.elementor-308 .elementor-element.elementor-element-3b36084a>.ev-home-hero{position:absolute!important;inset:0!important;z-index:0!important;display:block!important;pointer-events:none;overflow:hidden}
+.elementor-308 .elementor-element.elementor-element-3b36084a>.elementor-background-overlay{position:absolute;inset:0;z-index:1!important;pointer-events:none}
+.elementor-308 .elementor-element.elementor-element-3b36084a>.elementor-container{position:relative;z-index:2!important}
+.ev-home-hero-slide{inset:-4%;opacity:0;transform:scale(1.14) translate3d(1%,1%,0);transition:opacity 1400ms ease,transform 8000ms ease-out;backface-visibility:hidden}
+.ev-home-hero-slide.is-visible{opacity:1;transform:scale(1.01) translate3d(0,0,0)}
+@media(prefers-reduced-motion:reduce){.ev-home-hero-slide{transition:opacity 250ms linear!important;transform:none!important}}
