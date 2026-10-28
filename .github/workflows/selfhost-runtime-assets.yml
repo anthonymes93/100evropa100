@@ -1,0 +1,23 @@
+name: Self-host web fonts and remove external map embed
+on:
+  push:
+    paths:
+      - .github/workflows/selfhost-runtime-assets.yml
+      - scripts/selfhost_runtime_assets.py
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  localize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download all required font assets and rewrite in one transaction
+        run: python3 scripts/selfhost_runtime_assets.py
+      - name: Commit fully localized font assets and HTML
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/fonts index.html services/index.html contact-us/index.html projects/index*.html
+          git diff --cached --quiet || (git commit -m "Self-host Google Fonts and replace embedded map with local contact card" && git push)
