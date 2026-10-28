@@ -90,8 +90,10 @@ jobs:
                       page.wait_for_timeout(1800)
                       print('BROWSER',route,'HTTP',response.status if response else None,'title',page.title(),'images',page.locator('img').count())
                       if not response or response.status>=400:browser_issues.append(['BAD_PAGE_STATUS',route,str(response.status if response else None)])
-                      broken=page.evaluate('''() => [...document.images].filter(i=>i.complete&&i.naturalWidth===0).map(i=>i.src).slice(0,30)''')
+                      broken=page.evaluate('''() => [...document.images].filter(i=>{let src=i.getAttribute('src');return src && src !== '#' && !src.startsWith('data:') && i.complete && i.naturalWidth===0}).map(i=>i.src).slice(0,30)''')
                       for image in broken:browser_issues.append(['BROKEN_IMAGE',route,image])
+                      placeholders=page.evaluate('''() => [...document.images].filter(i=>!i.getAttribute('src') || i.getAttribute('src')==='#').length''')
+                      print('BROWSER placeholder images',route,placeholders)
                       if route=='/projects/':
                           btn=page.get_by_role('button',name='Next →')
                           if btn.count():

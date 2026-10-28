@@ -7,7 +7,7 @@
 @font-face {
 	font-family:'themify';
 	src:url('../fonts/themify9f24.eot?-fvbane');
-	src:url('/fonts/themifyd41d.html?#iefix-fvbane') format('embedded-opentype'),url('../fonts/themify9f24.woff?-fvbane') format('woff'),url('../fonts/themify9f24.ttf?-fvbane') format('truetype'),url('../fonts/themify9f24.svg?-fvbane#themify') format('svg');
+	src:url('../fonts/themify9f24.eot?#iefix-fvbane') format('embedded-opentype'),url('../fonts/themify9f24.woff?-fvbane') format('woff'),url('../fonts/themify9f24.ttf?-fvbane') format('truetype'),url('../fonts/themify9f24.svg?-fvbane#themify') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
