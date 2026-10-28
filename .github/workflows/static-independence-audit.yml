@@ -72,6 +72,7 @@ jobs:
           for p in pages:
               s=(root/p).read_text(errors='replace')
               if 'evropaflooring.com' in s:issues.append(['ORIGINAL_DOMAIN_IN_PAGE',p,''])
+          print('AUDIT revision: corrected self-hosted font path verification')
           print('LOCAL files',len(files),'pages',len(pages),'reference_checks',dict(counters))
           print('LOCAL issues',json.dumps(issues[:100],indent=2))
           print('LOCAL external reference samples',json.dumps(warnings[:60],indent=2))
