@@ -81,6 +81,11 @@ jobs:
               context=browser.new_context(viewport={'width':1440,'height':900},service_workers='block')
               page=context.new_page()
               seen=[]
+              blocked=[]
+              def block_original(route):
+                  blocked.append(route.request.url)
+                  route.abort()
+              page.route(re.compile(r'^https?://(?:[^/]*\\.)?evropaflooring\\.com(?:/|$)',re.I),block_original)
               page.on('request',lambda req:seen.append(req.url))
               page.on('pageerror',lambda err:browser_issues.append(['JS_ERROR',str(err)]))
               site=os.environ['SITE_URL'].rstrip('/')
@@ -104,6 +109,8 @@ jobs:
               for u in set(seen):
                   host=urllib.parse.urlsplit(u).netloc.lower()
                   if any(host==d or host.endswith('.'+d) for d in originals):browser_issues.append(['ORIGINAL_DOMAIN_REQUEST','',u])
+              if blocked:browser_issues.append(['ORIGINAL_SERVER_ATTEMPTED', '', str(blocked[:20])])
+              print('BROWSER original server blocked attempts',len(blocked))
               print('BROWSER request count',len(seen))
               print('BROWSER external hosts',sorted({urllib.parse.urlsplit(u).netloc for u in seen if urllib.parse.urlsplit(u).netloc not in ('100evropa100.vercel.app',)}))
               browser.close()
