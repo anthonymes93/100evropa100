@@ -167,6 +167,30 @@ var bwg_objectsL10n = {"bwg_field_required":"field is required.","bwg_mail_valid
 @keyframes evChargeFlow{from{background-position:0 0}to{background-position:200px 0}}
 @media(prefers-reduced-motion:reduce){.ev-partners .ev-signal-progress:before,.ev-signal-modal .ev-signal-dialog:before{animation:none!important}.ev-partners .ev-signal-choice .ev-signal-arrow{transition:none!important}}
 </style>
+<style id="ev-signal-cinematic-v2">
+/* Solid, precision-machined red line — no diagonal/candy-cane pattern. */
+.ev-partners .ev-signal-progress{background:#e4002b!important;box-shadow:0 0 10px #ff1642,0 0 35px #e4002b8c,0 0 65px #e4002b3d!important;transition:left .57s cubic-bezier(.16,1,.3,1),width .57s cubic-bezier(.16,1,.3,1)!important}
+.ev-partners .ev-signal-progress:before{content:"";position:absolute;inset:0;background:none!important;animation:none!important;opacity:0!important}
+.ev-partners .ev-signal-progress:after{content:"";position:absolute;right:-8px;top:-7px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 0 0 4px #ff174466,0 0 17px 5px #ff245b,0 0 38px 12px #e4002b90;filter:none;opacity:0;transform:scale(.2);transition:opacity .2s,transform .35s}
+.ev-partners .ev-signal-track.is-moving .ev-signal-progress:after{opacity:1;transform:scale(1)}
+.ev-partners .ev-signal-glow{background:#e4002b;width:95px;filter:blur(20px)}
+.ev-partners .ev-signal-choice{perspective:900px;transition:background .32s ease!important}
+.ev-partners .ev-signal-choice .ev-signal-index{transition:transform .35s cubic-bezier(.2,1.6,.3,1),color .3s}
+.ev-partners .ev-signal-choice.is-signal-hover .ev-signal-index{transform:translateY(-3px) scale(1.1)}
+.ev-partners .ev-signal-choice.is-signal-hover{background:linear-gradient(180deg,#e4002b1c,transparent)!important}
+.ev-partners .ev-signal-choice.is-signal-hover:before{background:radial-gradient(ellipse at 50% -10%,#ff28583d,transparent 72%)}
+.ev-partners .ev-signal-choice .ev-signal-arrow{transition:transform .35s cubic-bezier(.2,1.5,.3,1),color .3s}
+.ev-partners .ev-signal-choice.is-signal-hover .ev-signal-arrow{transform:translate(4px,-4px) rotate(0deg) scale(1.3)}
+.ev-signal-modal .ev-signal-dialog{border-top:4px solid #e4002b;box-shadow:0 0 0 1px #ffffff16,0 35px 125px #000d,0 0 90px #e4002b1c;animation:evCinematicEnter .55s cubic-bezier(.16,1,.3,1) both}
+.ev-signal-modal .ev-signal-dialog:before{background:#e4002b!important;background-size:auto!important;animation:none!important;height:4px}
+.ev-signal-modal .ev-signal-visual:before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;border-left:3px solid #e4002b;opacity:.85}
+.ev-signal-modal .ev-signal-pagination button{transition:color .25s,border-color .25s,transform .25s}
+.ev-signal-modal .ev-signal-pagination button:hover{color:white;transform:translateY(-3px)}
+.ev-signal-modal .ev-signal-next:hover span{display:inline-block;transform:translateX(5px)}
+.ev-signal-modal .ev-signal-next span{display:inline-block;transition:transform .25s}
+@keyframes evCinematicEnter{0%{opacity:0;transform:translateY(55px) scale(.97);filter:blur(7px)}100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
+@media(prefers-reduced-motion:reduce){.ev-signal-modal .ev-signal-dialog{animation:none!important}.ev-partners .ev-signal-progress:after{transition:none!important}}
+</style>
 </head>
 
 <body itemtype='https://schema.org/WebPage' itemscope='itemscope' class="wp-singular page-template-default page page-id-9999 wp-custom-logo wp-theme-astra ast-desktop ast-page-builder-template ast-no-sidebar astra-4.6.16 ast-single-post ast-replace-site-logo-transparent ast-inherit-site-logo-transparent ast-theme-transparent-header ast-hfb-header elementor-default elementor-kit-500 elementor-page elementor-page-9999">
