@@ -146,6 +146,27 @@ var bwg_objectsL10n = {"bwg_field_required":"field is required.","bwg_mail_valid
 .ev-partners .ev-signal-choice:hover .ev-signal-index,.ev-partners .ev-signal-choice.is-signal-hover .ev-signal-index{color:#ff6781}
 @media(prefers-reduced-motion:reduce){.ev-partners .ev-signal-progress,.ev-partners .ev-signal-glow,.ev-partners .ev-signal-choice:before,.ev-partners .ev-signal-choice:after{transition:none!important}}
 </style>
+<style id="ev-signal-hyperdrive">
+.ev-partners .ev-signal{position:relative;--spark-x:16%;--spark-y:0px}
+.ev-partners .ev-signal:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 180px 115px at var(--spark-x) var(--spark-y),rgba(255,22,65,.20),transparent 85%);opacity:0;transition:opacity .25s;z-index:1}
+.ev-partners .ev-signal:has(.ev-signal-choice:hover):before,.ev-partners .ev-signal:has(.ev-signal-choice:focus-visible):before{opacity:1}
+.ev-partners .ev-signal .ev-trustrow{position:relative;z-index:2}
+.ev-partners .ev-signal-choice{transform-style:preserve-3d;transition:background .25s,filter .25s;isolation:isolate}
+.ev-partners .ev-signal-choice.is-signal-hover{filter:drop-shadow(0 0 8px #e4002b40)}
+.ev-partners .ev-signal-choice .ev-signal-arrow{transition:transform .32s cubic-bezier(.2,1.8,.3,1),text-shadow .3s}
+.ev-partners .ev-signal-choice.is-signal-hover .ev-signal-arrow{transform:translate(6px,-6px) rotate(20deg) scale(1.4);text-shadow:0 0 15px #ff385b}
+.ev-partners .ev-signal-track{z-index:4}
+.ev-partners .ev-signal-progress{overflow:visible;background:linear-gradient(90deg,#9b001a,#e4002b 40%,#ff7391 80%,#fff 96%);box-shadow:0 0 7px #ff3059,0 0 23px #ff3059,0 0 55px #e4002b70}
+.ev-partners .ev-signal-progress:before{content:"";position:absolute;inset:-3px 0;background:repeating-linear-gradient(115deg,transparent 0 17px,#ffffffb0 19px 22px,transparent 24px 42px);mix-blend-mode:screen;opacity:.55;animation:evChargeFlow .75s linear infinite;clip-path:inset(2px 0)}
+.ev-partners .ev-signal-glow{height:25px;top:-10px;width:80px;filter:blur(16px);background:#ff1744}
+.ev-partners .ev-signal-choice.is-signal-hover:after{height:2px;box-shadow:0 0 12px #ff1744,0 0 26px #ff1744}
+.ev-partners .ev-signal-choice.is-signal-hover:before{background:radial-gradient(ellipse at 50% 0%,rgba(255,28,72,.32),transparent 78%)}
+.ev-signal-modal .ev-signal-dialog{box-shadow:0 0 0 1px #ff37603d,0 40px 110px #000c,0 0 80px #e4002b25}
+.ev-signal-modal .ev-signal-dialog:before{content:"";height:5px;position:absolute;top:0;left:0;width:100%;background:linear-gradient(90deg,transparent,#fff,#e4002b,#fff,transparent);background-size:200% 100%;animation:evChargeFlow 1.5s linear infinite;z-index:2}
+.ev-signal-modal .ev-signal-visual img{animation:evImageIn 1s cubic-bezier(.2,1,.2,1) both}
+@keyframes evChargeFlow{from{background-position:0 0}to{background-position:200px 0}}
+@media(prefers-reduced-motion:reduce){.ev-partners .ev-signal-progress:before,.ev-signal-modal .ev-signal-dialog:before{animation:none!important}.ev-partners .ev-signal-choice .ev-signal-arrow{transition:none!important}}
+</style>
 </head>
 
 <body itemtype='https://schema.org/WebPage' itemscope='itemscope' class="wp-singular page-template-default page page-id-9999 wp-custom-logo wp-theme-astra ast-desktop ast-page-builder-template ast-no-sidebar astra-4.6.16 ast-single-post ast-replace-site-logo-transparent ast-inherit-site-logo-transparent ast-theme-transparent-header ast-hfb-header elementor-default elementor-kit-500 elementor-page elementor-page-9999">
@@ -392,6 +413,7 @@ var entries=[
 var active=0,lastFocus=null,open=false;
 function moveLine(i){var box=choices[i].getBoundingClientRect(),base=track.getBoundingClientRect();progress.style.left=(box.left-base.left)+'px';progress.style.width=box.width+'px';progress.style.transform='none';glow.style.left=(box.left-base.left+box.width-32)+'px';track.classList.add('is-moving');clearTimeout(moveLine.timeout);moveLine.timeout=setTimeout(function(){track.classList.remove('is-moving')},600)}
 function preview(i){if(open)return;choices.forEach(function(c,k){c.classList.toggle('is-signal-hover',i===k)});moveLine(i)}
+bar.addEventListener('pointermove',function(e){if(e.pointerType==='touch'||open)return;var b=bar.getBoundingClientRect();bar.style.setProperty('--spark-x',(e.clientX-b.left)+'px');bar.style.setProperty('--spark-y',(e.clientY-b.top)+'px')});
 function resetPreview(){choices.forEach(function(c){c.classList.remove('is-signal-hover')});moveLine(active)}
 function setPanel(i){active=i;var e=entries[i];moveLine(i);modal.classList.remove('is-switching');void modal.offsetWidth;modal.classList.add('is-switching');modal.querySelector('#ev-signal-number').textContent=e.number;modal.querySelector('#ev-signal-title').textContent=e.title;var dot=document.createElement('span');dot.textContent='.';modal.querySelector('#ev-signal-title').appendChild(dot);modal.querySelector('#ev-signal-description').textContent=e.desc;modal.querySelector('.ev-signal-caption').textContent=e.caption;var img=modal.querySelector('#ev-signal-image');img.src=e.image;img.alt=e.alt;modal.querySelector('.ev-signal-visual-number').textContent='0'+(i+1);pages.forEach(function(p,k){p.setAttribute('aria-current',k===i?'true':'false')});}
 function show(i){lastFocus=document.activeElement;setPanel(i);modal.hidden=false;open=true;document.body.classList.add('ev-signal-locked');close.focus({preventScroll:true})}
